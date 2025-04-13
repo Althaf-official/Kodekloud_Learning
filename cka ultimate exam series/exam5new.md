@@ -255,8 +255,11 @@ Create a VPA named api-vpa in Auto Mode for a deployment named api-deployment in
 The containerName in VPA should explicitly match the container name inside api-deployment.
 
 Solution
+
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+
+
+      ssh cluster1-controlplane
 
 Next, check the deployment in the "services" namespace by running:
 
@@ -264,27 +267,27 @@ kubectl get deploy -n services
 
 To create a Vertical Pod Autoscaler (VPA) in auto mode that scales the application within the specified resource constraints, utilize the following configuration:
 
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: api-vpa
-  namespace: services
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: api-deployment
-  updatePolicy:
-    updateMode: "Auto"
-  resourcePolicy:
-    containerPolicies:
-    - containerName: api-container
-      minAllowed:
-        cpu: "600m"
-        memory: "600Mi"
-      maxAllowed:
-        cpu: "1"
-        memory: "1Gi"
+            apiVersion: autoscaling.k8s.io/v1
+            kind: VerticalPodAutoscaler
+            metadata:
+              name: api-vpa
+              namespace: services
+            spec:
+              targetRef:
+                apiVersion: apps/v1
+                kind: Deployment
+                name: api-deployment
+              updatePolicy:
+                updateMode: "Auto"
+              resourcePolicy:
+                containerPolicies:
+                - containerName: api-container
+                  minAllowed:
+                    cpu: "600m"
+                    memory: "600Mi"
+                  maxAllowed:
+                    cpu: "1"
+                    memory: "1Gi"
 
 Details
 
@@ -315,8 +318,10 @@ Use the following specs-
 
 
 Solution
+
 SSH into the cluster3-controlplane host
-ssh cluster3-controlplane
+
+      ssh cluster3-controlplane
 
 
 
@@ -334,30 +339,30 @@ kubectl create configmap webapp-wl10-config-map --from-literal=APP_COLOR=red
 
 And now configure the newly created configmap to the web application pod's template: -
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: webapp-color-wl10
-  name: webapp-color-wl10
-  namespace: default
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: webapp-color-wl10
-  template:
-    metadata:
-      labels:
-        app: webapp-color-wl10
-    spec:
-      containers:
-      - image: kodekloud/webapp-color
-        name: webapp-color-wl10
-        envFrom:
-        - configMapRef: 
-            name: webapp-wl10-config-map
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              labels:
+                app: webapp-color-wl10
+              name: webapp-color-wl10
+              namespace: default
+            spec:
+              replicas: 2
+              selector:
+                matchLabels:
+                  app: webapp-color-wl10
+              template:
+                metadata:
+                  labels:
+                    app: webapp-color-wl10
+                spec:
+                  containers:
+                  - image: kodekloud/webapp-color
+                    name: webapp-color-wl10
+                    envFrom:
+                    - configMapRef: 
+                        name: webapp-wl10-config-map
 
 
 
@@ -367,7 +372,7 @@ NOTE: - It will terminate the old pods and will recreate the new pods with confi
 
 You can inspect the newly created pod to check the configMap: -
 
-kubectl describe po webapp-color-wl10-d79c6f76c-4gjmz
+            kubectl describe po webapp-color-wl10-d79c6f76c-4gjmz
 
 
 
@@ -398,8 +403,10 @@ NOTE: - We have to perform this task on the cluster1-controlplane node.
 You can SSH into the cluster1 using ssh cluster1-controlplane command.
 
 Solution
+
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+
+            ssh cluster1-controlplane
 
 
 
@@ -409,7 +416,7 @@ In this task, we will use the kubectl and helm commands. Here are the steps: -
 
 Log in to the cluster1-controlplane node first and use the helm ls command to list all the releases installed using Helm in the Kubernetes cluster.
 
-helm ls -A
+            helm ls -A
 
 
 
@@ -421,13 +428,14 @@ Identify the namespace where the resources get deployed.
 
 
 Use the helm repo ls command to list the helm repositories.
-helm repo ls 
+
+            helm repo ls 
 
 
 
 Now, update the helm repository with the following command: -
 
-helm repo update lvm-crystal-apd -n crystal-apd-ns
+            helm repo update lvm-crystal-apd -n crystal-apd-ns
 
 
 
@@ -436,23 +444,24 @@ The above command updates the local cache of available charts from the configure
 
 
 The helm search command searches for all the available charts in a specific Helm chart repository. In our case, it's the fluent-bit helm chart.
-helm search repo lvm-crystal-apd/fluent-bit -n crystal-apd-ns -l | head -n30
+
+            helm search repo lvm-crystal-apd/fluent-bit -n crystal-apd-ns -l | head -n30
 
 
 
-The -l or --versions option is used to display information about all available chart versions.
+            The -l or --versions option is used to display information about all available chart versions.
 
 
 
 Upgrade the helm chart to 0.48.5 and also, increase the replica count of the deployment to 3 from the command line. Use the helm upgrade command as follows: -
 
-helm upgrade lvm-crystal-apd lvm-crystal-apd/fluent-bit -n crystal-apd-ns --version=0.48.5 --set replicaCount=3 --set kind=Deployment
+            helm upgrade lvm-crystal-apd lvm-crystal-apd/fluent-bit -n crystal-apd-ns --version=0.48.5 --set replicaCount=3 --set kind=Deployment
 
 
 
 After upgrading the chart version, you can verify it with the following command: -
 
-helm ls -n crystal-apd-ns
+            helm ls -n crystal-apd-ns
 
 
 
@@ -461,7 +470,8 @@ Look under the CHART column for the chart version.
 
 
 Use the kubectl get command to check the replicas of the deployment: -
-kubectl get deploy -n crystal-apd-ns
+
+            kubectl get deploy -n crystal-apd-ns
 
 
 
@@ -489,34 +499,36 @@ We recently deployed a DaemonSet called logs-cka26-trb under kube-system namespa
 Troubleshoot the issue and fix it to make sure the pods are getting created on all nodes including the controlplane node.
 
 Solution
+
 SSH into the cluster2-controlplane host
-ssh cluster2-controlplane
+
+            ssh cluster2-controlplane
 
 Check the status of DaemonSet
 
-kubectl get ds logs-cka26-trb -n kube-system
+            kubectl get ds logs-cka26-trb -n kube-system
 
 Verify the Number of Nodes
 
-kubectl get nodes
+            kubectl get nodes
 
 You will observe that the values for DESIRED, CURRENT, READY, etc., are not equal to 2. This indicates that a total of two pods were expected to be created; however, only one pod has been created. You can confirm this by listing the pods:
 
-kubectl get pod  -n kube-system
+            kubectl get pod  -n kube-system
 
 You can check on which nodes these are created on
 
-kubectl get pod <pod-name> -n kube-system -o wide
+            kubectl get pod <pod-name> -n kube-system -o wide
 
 Under NODE you will find the node name, so we can see that its not scheduled on the controlplane node which is because it must be missing the reqiured tolerations. Let's edit the DaemonSet to fix the tolerations
 
-kubectl edit ds logs-cka26-trb -n kube-system
+            kubectl edit ds logs-cka26-trb -n kube-system
 
 Under tolerations: add below given tolerations as well
 
-- key: node-role.kubernetes.io/control-plane
-  operator: Exists
-  effect: NoSchedule
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
 
 Wait for some time PODs should schedule on all nodes now including the controlplane node.
 
@@ -539,16 +551,20 @@ Create an ingress resource nginx-ingress-cka04-svcn to load balance the incoming
 
 
 
-pathType: Prefix and path: /
+            pathType: Prefix and path: /
 
-Backend Service Name: nginx-service-cka04-svcn
+            Backend Service Name: nginx-service-cka04-svcn
 
-Backend Service Port: 80
+            Backend Service Port: 80
 
-ssl-redirect is set to false
+            ssl-redirect is set to false
 Solution
+
+
 SSH into the cluster3-controlplane host
-ssh cluster3-controlplane
+
+
+            ssh cluster3-controlplane
 
 
 
@@ -557,25 +573,25 @@ Now apply the ingress resource with the given requirements:
 
 
 
-kubectl apply -f - << EOF
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: nginx-ingress-cka04-svcn
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-service-cka04-svcn
-            port:
-              number: 80
-EOF
+            kubectl apply -f - << EOF
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: nginx-ingress-cka04-svcn
+              annotations:
+                nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            spec:
+              rules:
+              - http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: nginx-service-cka04-svcn
+                        port:
+                          number: 80
+            EOF
 
 
 
@@ -584,9 +600,9 @@ Check if the ingress resource was successfully created:
 
 
 
-student-node ~ ➜  kubectl get ingress
-NAME                       CLASS    HOSTS   ADDRESS       PORTS   AGE
-nginx-ingress-cka04-svcn   <none>   *       172.25.0.10   80      13s
+            student-node ~ ➜  kubectl get ingress
+            NAME                       CLASS    HOSTS   ADDRESS       PORTS   AGE
+            nginx-ingress-cka04-svcn   <none>   *       172.25.0.10   80      13s
 
 
 
@@ -595,10 +611,10 @@ As the ingress controller is exposed on cluster3-controlplane using traefik serv
 
 
 
-student-node ~ ➜  ssh cluster3-controlplane
-
-cluster3-controlplane:~# curl -I 10.43.178.15
-HTTP/1.1 200 OK
+            student-node ~ ➜  ssh cluster3-controlplane
+            
+            cluster3-controlplane:~# curl -I 10.43.178.15
+            HTTP/1.1 200 OK
 ...
 
 Details
@@ -624,73 +640,76 @@ A storage class called coconut-stc-cka01-str was created earlier.
 Use this storage class to create a persistent volume called coconut-pv-cka01-str as per below requirements:
 
 
-- Capacity should be 100Mi.
-
-- The volume type should be hostpath and the path should be /opt/coconut-stc-cka01-str.
-
-- Use coconut-stc-cka01-str storage class.
-
-- This volume must be created on cluster1-node01 (the /opt/coconut-stc-cka01-str directory already exists on this node).
-
-- It must have a label with key: storage-tier with value: gold.
-
+            - Capacity should be 100Mi.
+            
+            - The volume type should be hostpath and the path should be /opt/coconut-stc-cka01-str.
+            
+            - Use coconut-stc-cka01-str storage class.
+            
+            - This volume must be created on cluster1-node01 (the /opt/coconut-stc-cka01-str directory already exists on this node).
+            
+            - It must have a label with key: storage-tier with value: gold.
+            
 
 Also, create a persistent volume claim with the name coconut-pvc-cka01-str as per the below specs:
 
 
-- Request 50Mi of storage from coconut-pv-cka01-str PV. It must use matchLabels to use the PV.
-
-- Use coconut-stc-cka01-str storage class.
-
-- The access mode must be ReadWriteMany.
+            - Request 50Mi of storage from coconut-pv-cka01-str PV. It must use matchLabels to use the PV.
+            
+            - Use coconut-stc-cka01-str storage class.
+            
+            - The access mode must be ReadWriteMany.
 
 
 Solution
+
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+
+
+            ssh cluster1-controlplane
 
 Create a yaml template as below:
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: coconut-pv-cka01-str
-  labels: 
-    storage-tier: gold
-spec:
-  capacity:
-    storage: 100Mi
-  accessModes:
-    - ReadWriteMany
-  hostPath:
-    path: /opt/coconut-stc-cka01-str
-  storageClassName: coconut-stc-cka01-str
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - cluster1-node01
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: coconut-pvc-cka01-str
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 50Mi
-  storageClassName: coconut-stc-cka01-str
-  selector: 
-    matchLabels:
-      storage-tier: gold
-
-Apply the template.
-kubectl apply -f <template-name>.yaml
+            ---
+            apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              name: coconut-pv-cka01-str
+              labels: 
+                storage-tier: gold
+            spec:
+              capacity:
+                storage: 100Mi
+              accessModes:
+                - ReadWriteMany
+              hostPath:
+                path: /opt/coconut-stc-cka01-str
+              storageClassName: coconut-stc-cka01-str
+              nodeAffinity:
+                required:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: kubernetes.io/hostname
+                          operator: In
+                          values:
+                            - cluster1-node01
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: coconut-pvc-cka01-str
+            spec:
+              accessModes:
+                - ReadWriteMany
+              resources:
+                requests:
+                  storage: 50Mi
+              storageClassName: coconut-stc-cka01-str
+              selector: 
+                matchLabels:
+                  storage-tier: gold
+            
+            Apply the template.
+            kubectl apply -f <template-name>.yaml
 
 Details
 
@@ -706,62 +725,66 @@ Solve this question on: ssh cluster2-controlplane
 
 A Kustomize configuration is located at /root/web-dashboard-kustomize on cluster2-controlplane. This application is designed to monitor the pods in the default namespace. It has been deployed using the following command:
 
-kubectl kustomize /root/web-dashboard-kustomize/overlays/dev | kubectl apply -f -
+            kubectl kustomize /root/web-dashboard-kustomize/overlays/dev | kubectl apply -f -
 
 The application is currently unable to monitor the pods due to insufficient permissions. Modify the Kustomize overlays/dev configuration to ensure the application is operational.
 
 The application is currently unable to monitor the pods due to insufficient permissions. Adjust the Kustomize configuration accordingly to ensure the application is operational.
 
 Solution
+
+
 SSH into the Control Plane
+
+
 To access cluster2-controlplane, please execute the following command:
 
-ssh cluster2-controlplane
+            ssh cluster2-controlplane
 
 Step 1: Understand Kustomize Configuration
 To review the resources that Kustomize deploys for the application, execute the command below:
 
-kubectl kustomize /root/web-dashboard-kustomize/overlays/dev
+            kubectl kustomize /root/web-dashboard-kustomize/overlays/dev
 
 This configuration deploys a deployment, service, role, and role binding.
 
 Step 2: Check the Application Logs
 To investigate the reason for the application's failure, run the following command:
 
-cluster2-controlplane ~ ➜  kubectl logs deploy/web-dashboard 
+            cluster2-controlplane ~ ➜  kubectl logs deploy/web-dashboard 
 
 You may see an error message resembling the following:
 
-🔄 Checking pods...
-❌ Error: (403)
-Reason: Forbidden
-HTTP response headers: HTTPHeaderDict({'Audit-Id': '17982343-1d59-48fa-b823-705dcea07343', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Kubernetes-Pf-Flowschema-Uid': 'a7bfc6de-292c-48d3-bd63-8e625fdbc639', 'X-Kubernetes-Pf-Prioritylevel-Uid': '7e373b29-1156-4299-b472-203a7df999f2', 'Date': 'Mon, 24 Mar 2025 12:21:02 GMT', 'Content-Length': '287'})
-HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:default:dashboard-sa\" cannot list resource \"pods\" in API group \"\" in the namespace \"default\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
-
-The application is failing due to insufficient permissions.
+            🔄 Checking pods...
+            ❌ Error: (403)
+            Reason: Forbidden
+            HTTP response headers: HTTPHeaderDict({'Audit-Id': '17982343-1d59-48fa-b823-705dcea07343', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff', 'X-Kubernetes-Pf-Flowschema-Uid': 'a7bfc6de-292c-48d3-bd63-8e625fdbc639', 'X-Kubernetes-Pf-Prioritylevel-Uid': '7e373b29-1156-4299-b472-203a7df999f2', 'Date': 'Mon, 24 Mar 2025 12:21:02 GMT', 'Content-Length': '287'})
+            HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"pods is forbidden: User \"system:serviceaccount:default:dashboard-sa\" cannot list resource \"pods\" in API group \"\" in the namespace \"default\"","reason":"Forbidden","details":{"kind":"pods"},"code":403}
+            
+            The application is failing due to insufficient permissions.
 
 Step 3: Fix the Kustomize Configuration
 Update the pod-reader role in /root/web-dashboard-kustomize/overlays/dev/patch-role.yaml as follows:
 
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-reader
-  namespace: default
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              name: pod-reader
+              namespace: default
+            rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list", "watch"]
 
 After making the necessary updates, apply the changes using the Kustomize configuration with the following command:
 
-kubectl kustomize /root/web-dashboard-kustomize/overlays/dev | kubectl apply -f -
+            kubectl kustomize /root/web-dashboard-kustomize/overlays/dev | kubectl apply -f -
 
 ####Step 4: Verify the Application Status
 
 To confirm whether the application is running, execute the following command:
 
-kubectl get pods
+            kubectl get pods
 
 Details
 
@@ -780,15 +803,18 @@ The deployment called web-dp-cka17-trb has 0 out of 1 pods up and running. Troub
 The application runs on port 80 inside the container and is exposed on the node port 30090.
 
 Solution
+
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+
+
+            ssh cluster1-controlplane
 
 List out the PODs
 kubectl get pod
 
 Let's look into the relevant events:
 
-kubectl get event --field-selector involvedObject.name=<pod-name>
+            kubectl get event --field-selector involvedObject.name=<pod-name>
 
 You should see some errors as below:
 
@@ -796,29 +822,30 @@ Warning   FailedScheduling   pod/web-dp-cka17-trb-9bdd6779-fm95t   0/3 nodes are
 
 From the error we can see that its something related to the PVCs. So let' look into that.
 
-kubectl get pv
-kubectl get pvc
+            kubectl get pv
+            kubectl get pvc
 
 You will notice that web-pvc-cka17-trb is stuck in pending and also the capacity of web-pv-cka17-trb volume is 100Mi.
 Now let's dig more into the PVC:
 
-kubectl get pvc web-pvc-cka17-trb -o yaml
+            kubectl get pvc web-pvc-cka17-trb -o yaml
 
 Notice the storage which is 150Mi which means its trying to claim 150Mi of storage from a 100Mi PV. So let's edit this PV.
 
-kubectl edit pv web-pv-cka17-trb
+            kubectl edit pv web-pv-cka17-trb
 
 Change storage: 100Mi to storage: 150Mi
 Check again the pvc
-kubectl get pvc
+            
+            kubectl get pvc
 
 web-pvc-cka17-trb should be good now. let's see the PODs
 
-kubectl get pod
+            kubectl get pod
 
 POD should not be in pending state now but it must be crashing with Init:CrashLoopBackOff status, which means somehow the init container is crashing. So let's check the logs.
 
-kubectl get event --field-selector involvedObject.name=<pod-name>
+            kubectl get event --field-selector involvedObject.name=<pod-name>
 
 You should see someting like
 
@@ -826,7 +853,7 @@ Warning   Failed      pod/web-dp-cka17-trb-67c9bdcd85-4tvpr   Error: failed to c
 
 Let's look into the deployment:
 
-kubectl edit deploy web-dp-cka17-trb
+            kubectl edit deploy web-dp-cka17-trb
 
 Under initContainers: -> - command: change /bin/bsh\ to /bin/bash
 let's see the PODs
@@ -836,7 +863,7 @@ Wait for some time to make sure it is stable, but you will notice that its resta
 
 So let's check the events again.
 
-kubectl get event --field-selector involvedObject.name=<pod-name>
+            kubectl get event --field-selector involvedObject.name=<pod-name>
 
 You should see someting like
 
@@ -844,13 +871,13 @@ Warning   Unhealthy   pod/web-dp-cka17-trb-647f69f8bd-67xmx   Liveness probe fai
 
 Seems like its not able to connect to a service, let's look into the deployment to understand
 
-kubectl edit deploy web-dp-cka17-trb
+            kubectl edit deploy web-dp-cka17-trb
 
 Notice that containerPort: 80 but under livenessProbe: the port: 81 so seems like livenessProbe is using wrong port. let's change port: 81 to port: 80
 
 See the PODs now
 
-kubectl get pod
+            kubectl get pod
 
 It should be good now.
 
@@ -871,36 +898,38 @@ Create the web-app-route in the ck2145 namespace. This route should direct reque
 Note: Gateway has already been created in the nginx-gateway namespace.
 To test the gateway, execute the following command:
 
-curl -H 'X-Environment: canary' http://localhost:30080
+            curl -H 'X-Environment: canary' http://localhost:30080
 
 Solution
+
 SSH into the cluster3-controlplane host
-ssh cluster3-controlplane
+
+            ssh cluster3-controlplane
 
 
 
 To direct traffic based on the X-Environment: canary HTTP header to web-service-canary on port 8080, while routing the rest of the traffic to web-service on port 8080, please utilize the manifest provided below:
 
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: web-app-route
-  namespace: ck2145
-spec:
-  parentRefs:
-  - name: nginx-gateway 
-    namespace: nginx-gateway
-  rules:
-  - matches:
-    - headers:
-      - name: X-Environment
-        value: canary
-    backendRefs:
-    - name: web-service-canary
-      port: 8080
-  - backendRefs:
-    - name: web-service
-      port: 8080
+            apiVersion: gateway.networking.k8s.io/v1
+            kind: HTTPRoute
+            metadata:
+              name: web-app-route
+              namespace: ck2145
+            spec:
+              parentRefs:
+              - name: nginx-gateway 
+                namespace: nginx-gateway
+              rules:
+              - matches:
+                - headers:
+                  - name: X-Environment
+                    value: canary
+                backendRefs:
+                - name: web-service-canary
+                  port: 8080
+              - backendRefs:
+                - name: web-service
+                  port: 8080
 
 Details
 
@@ -930,42 +959,46 @@ Or by 20% of the current replica count, whichever results in fewer pods being re
 This should occur within a time frame of 60 seconds.
 
 Solution
+
+
 SSH into the cluster3-controlplane host
-ssh cluster3-controlplane
+
+
+            ssh cluster3-controlplane
 
 
 
 To create a Horizontal Pod Autoscaler (HPA) for the backend-deployment in the cka0841 namespace based on CPU utilization, and to enable scaling down by either 20% of the current replicas or a maximum reduction of 5 pods, utilize the following configuration:
 
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: backend-hpa
-  namespace: cka0841
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: backend-deployment
-  minReplicas: 3
-  maxReplicas: 15
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
-  behavior:
-    scaleDown:
-      policies:
-      - type: Pods
-        value: 5
-        periodSeconds: 60
-      - type: Percent
-        value: 20
-        periodSeconds: 60
-      selectPolicy: Min
+            apiVersion: autoscaling/v2
+            kind: HorizontalPodAutoscaler
+            metadata:
+              name: backend-hpa
+              namespace: cka0841
+            spec:
+              scaleTargetRef:
+                apiVersion: apps/v1
+                kind: Deployment
+                name: backend-deployment
+              minReplicas: 3
+              maxReplicas: 15
+              metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 50
+              behavior:
+                scaleDown:
+                  policies:
+                  - type: Pods
+                    value: 5
+                    periodSeconds: 60
+                  - type: Percent
+                    value: 20
+                    periodSeconds: 60
+                  selectPolicy: Min
 
 Details
 
@@ -985,28 +1018,30 @@ Solve this question on: ssh cluster1-controlplane
 Create a storage class with the name banana-sc-cka08-str as per the following specifications:
 
 
-- Provisioner should be kubernetes.io/no-provisioner.
-
-- Volume binding mode should be WaitForFirstConsumer.
-
-- Volume expansion should be enabled.
-
+            - Provisioner should be kubernetes.io/no-provisioner.
+            
+            - Volume binding mode should be WaitForFirstConsumer.
+            
+            - Volume expansion should be enabled.
+            
 
 Solution
+
+
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+            ssh cluster1-controlplane
 
 Create a yaml template as below:
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: banana-sc-cka08-str
-provisioner: kubernetes.io/no-provisioner
-allowVolumeExpansion: true
-volumeBindingMode: WaitForFirstConsumer
+            kind: StorageClass
+            apiVersion: storage.k8s.io/v1
+            metadata:
+              name: banana-sc-cka08-str
+            provisioner: kubernetes.io/no-provisioner
+            allowVolumeExpansion: true
+            volumeBindingMode: WaitForFirstConsumer
 
 Apply the template:
-kubectl apply -f <template-file-name>.yaml
+            kubectl apply -f <template-file-name>.yaml
 
 Details
 
@@ -1027,58 +1062,69 @@ After the CNI installation, verify that pods can successfully communicate.
 
 Solution
 SSH into the cluster4-controlplane host
-ssh cluster4-controlplane
+
+
+            ssh cluster4-controlplane
 
 1. Install the Calico CNI
 Install the operator on your cluster:
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/tigera-operator.yaml
+            kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/tigera-operator.yaml
 
 Download the custom resources necessary to configure Calico to set the CIDR to 172.17.0.0/16 and set the encapsulation method to VXLAN:
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml -O
+
+
+            curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml -O
 
 Below is the structure of the final configuration:
 
 # This section includes base Calico installation configuration.
 # For more information, see: https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.Installation
-apiVersion: operator.tigera.io/v1
-kind: Installation
-metadata:
-  name: default
-spec:
-  # Configures Calico networking.
-  calicoNetwork:
-    ipPools:
-    - name: default-ipv4-ippool
-      blockSize: 26
-      cidr: 172.17.0.0/16
-      encapsulation: VXLAN
-      natOutgoing: Enabled
-      nodeSelector: all()
-
----
-
-# This section configures the Calico API server.
-# For more information, see: https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.APIServer
-apiVersion: operator.tigera.io/v1
-kind: APIServer
-metadata:
-  name: default
-spec: {}
+            apiVersion: operator.tigera.io/v1
+            kind: Installation
+            metadata:
+              name: default
+            spec:
+              # Configures Calico networking.
+              calicoNetwork:
+                ipPools:
+                - name: default-ipv4-ippool
+                  blockSize: 26
+                  cidr: 172.17.0.0/16
+                  encapsulation: VXLAN
+                  natOutgoing: Enabled
+                  nodeSelector: all()
+            
+            ---
+            
+            # This section configures the Calico API server.
+            # For more information, see: https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.APIServer
+            apiVersion: operator.tigera.io/v1
+            kind: APIServer
+            metadata:
+              name: default
+            spec: {}
 
 Apply the manifest by running the following command:
-kubectl create -f custom-resources.yaml
+
+            kubectl create -f custom-resources.yaml
 
 Verify Calico installation in your cluster.
-watch kubectl get pods -n calico-system
+
+            watch kubectl get pods -n calico-system
 
 2. Test the pod-to-pod communication.
 Run an nginx image:
-kubectl run web-app --image nginx
+
+            kubectl run web-app --image nginx
 
 Retrieve the IP address of the pod:
-kubectl get pod web-app -o jsonpath='{.status.podIP}'
+            
+            
+            kubectl get pod web-app -o jsonpath='{.status.podIP}'
 
 Test the connection:
-kubectl run test --rm -it -n kube-public --image=jrecord/nettools --restart=Never -- curl <IP>
+            
+            
+            kubectl run test --rm -it -n kube-public --image=jrecord/nettools --restart=Never -- curl <IP>
 
 Details
