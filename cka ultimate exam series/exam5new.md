@@ -13,60 +13,63 @@ For some reason, this pod is continuously crashing. Identify the issue and fix i
 
 Solution
 SSH into the cluster1-controlplane host
-ssh cluster1-controlplane
+
+      ssh cluster1-controlplane
 
 Check the container logs:
-kubectl logs -f nginx-cka01-trb -c nginx-container
+
+    kubectl logs -f nginx-cka01-trb -c nginx-container
 
 You can see that its not able to pull the image.
 
 Edit the pod
-kubectl edit pod nginx-cka01-trb -o yaml
+
+    kubectl edit pod nginx-cka01-trb -o yaml
 
 Change image tag from nginx:latst to nginx:latest
 Let's check now if the POD is in Running state
 
-kubectl get pod
+    kubectl get pod
 
 You will notice that its still crashing, so check the logs again:
 
-kubectl logs -f nginx-cka01-trb -c nginx-container
+    kubectl logs -f nginx-cka01-trb -c nginx-container
 
 From the logs you will notice that nginx-container is looking good now so it might be the sidecar container that is causing issues. Let's check its logs.
 
-kubectl logs -f nginx-cka01-trb -c logs-container
+    kubectl logs -f nginx-cka01-trb -c logs-container
 
 You will see some logs as below:
 
-cat: can't open '/var/log/httpd/access.log': No such file or directory
-cat: can't open '/var/log/httpd/error.log': No such file or directory
+    cat: can't open '/var/log/httpd/access.log': No such file or directory
+    cat: can't open '/var/log/httpd/error.log': No such file or directory
 
 Now, let's look into the sidecar container
 
-kubectl get pod nginx-cka01-trb -o yaml
+    kubectl get pod nginx-cka01-trb -o yaml
 
 Under containers: check the command: section, this is the command which is failing. If you notice its looking for the logs under /var/log/httpd/ directory but the mounted volume for logs is /var/log/nginx (under volumeMounts:). So we need to fix this path:
 
-kubectl get pod nginx-cka01-trb -o yaml > /tmp/test.yaml
-vi /tmp/test.yaml
+    kubectl get pod nginx-cka01-trb -o yaml > /tmp/test.yaml
+    vi /tmp/test.yaml
 
 Under command: change /var/log/httpd/access.log and /var/log/httpd/error.log to /var/log/nginx/access.log and /var/log/nginx/error.log respectively.
 
 Delete the existing POD now:
 
-kubectl delete pod nginx-cka01-trb
+    kubectl delete pod nginx-cka01-trb
 
 Create new one from the template
 
-kubectl apply -f /tmp/test.yaml
+    kubectl apply -f /tmp/test.yaml
 
 Let's check now if the POD is in Running state
 
-kubectl get pod
+    kubectl get pod
 
 It should be good now. So let's try to access the app.
 
-curl http://cluster1-controlplane:30001
+    curl http://cluster1-controlplane:30001
 
 You will see error
 
@@ -75,11 +78,13 @@ curl: (7) Failed to connect to cluster1-controlplane port 30001: Connection refu
 So you are not able to access the website, et's look into the service configuration.
 
 Edit the service
-kubectl edit svc nginx-service-cka01-trb -o yaml 
+
+    kubectl edit svc nginx-service-cka01-trb -o yaml 
 
 Change app label under selector from httpd-app-cka01-trb to nginx-app-cka01-trb
 You should be able to access the website now.
-curl http://cluster1-controlplane:30001
+
+    curl http://cluster1-controlplane:30001
 
 Details
 
@@ -99,27 +104,28 @@ NOTE: Only the value for the priority class should be recorded.
 
 Solution
 SSH into the cluster2-controlplane host
-ssh cluster2-controlplane
+
+    ssh cluster2-controlplane
 
 Step 1: Find the highest user-defined priority classes
 Run the below command to list all the priority classes in cluster.
 
-student-node ~ ✖ kubectl get priorityclasses.scheduling.k8s.io 
-NAME                      VALUE        GLOBAL-DEFAULT   AGE
-bronze-tier               997          false            3m2s
-burst-mode                998          false            3m2s
-default-tier              500          true             3m2s
-gold-tier                 998          false            3m2s
-silver-tier               999          false            3m2s
-system-cluster-critical   2000000000   false            74m
-system-node-critical      2000001000   false            74m
+    student-node ~ ✖ kubectl get priorityclasses.scheduling.k8s.io 
+    NAME                      VALUE        GLOBAL-DEFAULT   AGE
+    bronze-tier               997          false            3m2s
+    burst-mode                998          false            3m2s
+    default-tier              500          true             3m2s
+    gold-tier                 998          false            3m2s
+    silver-tier               999          false            3m2s
+    system-cluster-critical   2000000000   false            74m
+    system-node-critical      2000001000   false            74m
 
 The silver-tier priority class has highest user defined class.
 
 Step 2: Store the value
 Run the below command
 
-echo "999" > /root/highest-user-prio.txt
+    echo "999" > /root/highest-user-prio.txt
 
 Details
 
@@ -134,31 +140,32 @@ Solve this question on: ssh cluster5-controlplane
 
 You are an administrator preparing your environment to deploy a kubernetes cluster using kubeadm. Adjust the following network parameters on the system to the following values, and make sure your changes persist reboots:
 
-net.bridge.bridge-nf-call-iptables = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward = 1
-net.ipv4.conf.all.forwarding = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.ipv4.ip_forward = 1
+    net.ipv4.conf.all.forwarding = 1
+    
 Solution
 SSH into the Control Plane
 To access cluster5-controlplane, execute the following command:
 
-ssh cluster5-controlplane
+    ssh cluster5-controlplane
 
 1. Setup Network Configuration for Kubernetes Cluster
 To ensure consistent network changes across boots, create a configuration file by executing:
 
-vi /etc/sysctl.d/k8s.conf
+    vi /etc/sysctl.d/k8s.conf
 
 Add the following values to the file:
 
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
-net.ipv4.conf.all.forwarding        = 1
+    net.bridge.bridge-nf-call-iptables  = 1
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.ipv4.ip_forward                 = 1
+    net.ipv4.conf.all.forwarding        = 1
 
 To apply the changes, run the following command:
 
-sysctl --system
+    sysctl --system
 
 Details
 
@@ -181,55 +188,55 @@ Solution
 SSH into the Control Plane
 To access cluster2-controlplane, please execute the following command:
 
-ssh cluster2-controlplane
+    ssh cluster2-controlplane
 
 Step 1: Deploy the cka-sidecar-pod
 Utilize the YAML configuration provided below to create the desired pod:
 
-apiVersion: v1
-kind: Pod
-metadata:
-  name: cka-sidecar-pod
-  namespace: cka-multi-containers
-spec:
-  containers:
-    - name: main-container
-      image: nginx:1.27
-      command: ["/bin/sh"]
-      args:
-        - -c
-        - |
-          while true; do
-            echo "$(date) Hi I am from Sidecar container" >> /log/app.log;
-            sleep 5;
-          done
-      volumeMounts:
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: cka-sidecar-pod
+      namespace: cka-multi-containers
+    spec:
+      containers:
+        - name: main-container
+          image: nginx:1.27
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              while true; do
+                echo "$(date) Hi I am from Sidecar container" >> /log/app.log;
+                sleep 5;
+              done
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /log
+        - name: sidecar-container
+          image: nginx:1.25
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /usr/share/nginx/html
+      volumes:
         - name: shared-logs
-          mountPath: /log
-    - name: sidecar-container
-      image: nginx:1.25
-      volumeMounts:
-        - name: shared-logs
-          mountPath: /usr/share/nginx/html
-  volumes:
-    - name: shared-logs
-      emptyDir: {}
+          emptyDir: {}
 
 Step 2: Verify the Pod
 After waiting for the pod to become ready, execute the following command inside the pod to ensure that the sidecar-container is properly exposing the logs:
 
-kubectl exec -it -n cka-multi-containers cka-sidecar-pod -c sidecar-container -- curl http://localhost:80/app.log
+    kubectl exec -it -n cka-multi-containers cka-sidecar-pod -c sidecar-container -- curl http://localhost:80/app.log
 
 You should observe output similar to the following:
 
-Tue Mar 25 05:31:19 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:24 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:29 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:34 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:39 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:44 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:49 UTC 2025 Hi I am from Sidecar container
-Tue Mar 25 05:31:54 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:19 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:24 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:29 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:34 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:39 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:44 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:49 UTC 2025 Hi I am from Sidecar container
+    Tue Mar 25 05:31:54 UTC 2025 Hi I am from Sidecar container
 
 Details
 
